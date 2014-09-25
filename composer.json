@@ -18,7 +18,11 @@
         "phpunit/phpunit": "3.7.*",
         "apigen/apigen": "2.8.1"
     },
-
+  	"extra": {
+    	"branch-alias": {
+      		"dev-develop": "feature/PMII-1081"
+    	}
+  	},
     "repositories": [
         {
             "type": "vcs",
