@@ -16,6 +16,13 @@ class Client
      * @return AccessToken
      */
     function getAccessToken() { return $this->accessToken; }
+    
+    protected function setAccessToken($accessToken)
+    {
+        self::checkAccessTokenArg("accessToken", $accessToken);
+        
+        $this->accessToken = $accessToken;
+    }
 
     /** @var AccessToken */
     private $accessToken;
@@ -73,13 +80,13 @@ class Client
      * @param null|string $userLocale
      *     See {@link getUserLocale()}
      */
-    function __construct($accessToken, $clientIdentifier, $userLocale = null)
+    function __construct($clientIdentifier, $userLocale = null)
     {
-        self::checkAccessTokenArg("accessToken", $accessToken);
+//         self::checkAccessTokenArg("accessToken", $accessToken);
         self::checkClientIdentifierArg("clientIdentifier", $clientIdentifier);
         Checker::argStringNonEmptyOrNull("userLocale", $userLocale);
 
-        $this->accessToken = $accessToken;
+//         $this->accessToken = $accessToken;
         $this->clientIdentifier = $clientIdentifier;
         $this->userLocale = $userLocale;
 
@@ -87,8 +94,8 @@ class Client
         // we don't want it to be included in the documentation.  Use PHP arg list hacks to get at
         // it.
         $host = null;
-        if (\func_num_args() == 4) {
-            $host = \func_get_arg(3);
+        if (\func_num_args() == 3) {
+            $host = \func_get_arg(2);
             Host::checkArgOrNull("host", $host);
         }
         if ($host === null) {
@@ -785,10 +792,15 @@ class Client
             $this->appendFilePath("1/metadata", $path),
             $params);
 
+//         echo $response->statusCode."\n";
+        
         if ($response->statusCode === 404) return null;
         if ($response->statusCode !== 200) throw RequestUtil::unexpectedStatus($response);
 
         $metadata = RequestUtil::parseResponseJson($response->body);
+        
+//         print_r($metadata);
+        
         if (array_key_exists("is_deleted", $metadata) && $metadata["is_deleted"]) return null;
         return $metadata;
     }
