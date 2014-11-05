@@ -1,4 +1,9 @@
 ---------------------------------------------
+1.1.4 (2014-10-21)
+
+- Use TLS instead of SSLv3 (SSLv3 has security issues).
+
+---------------------------------------------
 1.1.3 (2014-01-28)
 
 - Fix for PHP installations that use NSS as the SSL backend.
