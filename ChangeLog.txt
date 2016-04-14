@@ -1,4 +1,17 @@
 ---------------------------------------------
+1.1.6 (2015-06-29)
+
+- WebAuth: Add support for "force_reapprove" parameter.
+- Add exception class for HTTP 507 error (over quota).
+- Put SDK version in HTTP request's "User-Agent" field.
+
+---------------------------------------------
+1.1.5 (2015-02-23)
+
+- Add RootCertificates::useExternalPaths() so SDK can be used in PHARs.
+- When reading AppInfo/AuthInfo files, strip out UTF-8 BOM if present.
+
+---------------------------------------------
 1.1.4 (2014-10-21)
 
 - Use TLS instead of SSLv3 (SSLv3 has security issues).
