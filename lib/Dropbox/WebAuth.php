@@ -4,7 +4,7 @@ namespace Dropbox;
 /**
  * OAuth 2 "authorization code" flow.  (This SDK does not support the "token" flow.)
  *
- * Use {@link WebAuth::start()} and {@link WebAuth::finish()} to guide your
+ * Use {@link start} and {@link finish} to guide your
  * user through the process of giving your app access to their Dropbox account.
  * At the end, you will have an access token, which you can pass to {@link Client}
  * and start making API calls.
@@ -81,11 +81,11 @@ class WebAuth extends WebAuthBase
 
     /**
      * A object that lets us save CSRF token string to the user's session.  If you're using the
-     * standard PHP <code>$_SESSION</code>, you can pass in something like
-     * <code>new ArrayEntryStore($_SESSION, 'dropbox-auth-csrf-token')</code>.
+     * standard PHP `$_SESSION`, you can pass in something like
+     * `new ArrayEntryStore($_SESSION, 'dropbox-auth-csrf-token')`.
      *
      * If you're not using $_SESSION, you might have to create your own class that provides
-     * the same <code>get()</code>/<code>set()</code>/<code>clear()</code> methods as
+     * the same `get()`/`set()`/`clear()` methods as
      * {@link ArrayEntryStore}.
      *
      * @return ValueStore
@@ -123,10 +123,10 @@ class WebAuth extends WebAuthBase
      * Starts the OAuth 2 authorization process, which involves redirecting the user to the
      * returned authorization URL (a URL on the Dropbox website).  When the user then
      * either approves or denies your app access, Dropbox will redirect them to the
-     * <code>$redirectUri</code> given to constructor, at which point you should
+     * `$redirectUri` given to constructor, at which point you should
      * call {@link finish()} to complete the authorization process.
      *
-     * This function will also save a CSRF token using the <code>$csrfTokenStore</code> given to
+     * This function will also save a CSRF token using the `$csrfTokenStore` given to
      * the constructor.  This CSRF token will be checked on {@link finish()} to prevent
      * request forgery.
      *
@@ -136,12 +136,17 @@ class WebAuth extends WebAuthBase
      *    Any data you would like to keep in the URL through the authorization process.
      *    This exact state will be returned to you by {@link finish()}.
      *
+     * @param boolean|null $forceReapprove
+     *    If a user has already approved your app, Dropbox may skip the "approve" step and
+     *    redirect immediately to your callback URL.  Setting this to `true` tells
+     *    Dropbox to never skip the "approve" step.
+     *
      * @return array
      *    The URL to redirect the user to.
      *
      * @throws Exception
      */
-    function start($urlState = null)
+    function start($urlState = null, $forceReapprove = false)
     {
         Checker::argStringOrNull("urlState", $urlState);
 
@@ -153,7 +158,7 @@ class WebAuth extends WebAuthBase
         }
         $this->csrfTokenStore->set($csrfToken);
 
-        return $this->_getAuthorizeUrl($this->redirectUri, $state);
+        return $this->_getAuthorizeUrl($this->redirectUri, $state, $forceReapprove);
     }
 
     private static function encodeCsrfToken($string)
@@ -171,9 +176,9 @@ class WebAuth extends WebAuthBase
      *    The query parameters on the GET request to your redirect URI.
      *
      * @return array
-     *    A <code>list(string $accessToken, string $userId, string $urlState)</code>, where
-     *    <code>$accessToken</code> can be used to construct a {@link Client}, <code>$userId</code>
-     *    is the user ID of the user's Dropbox account, and <code>$urlState</code> is the
+     *    A `list(string $accessToken, string $userId, string $urlState)`, where
+     *    `$accessToken` can be used to construct a {@link Client}, `$userId`
+     *    is the user ID of the user's Dropbox account, and `$urlState` is the
      *    value you originally passed in to {@link start()}.
      *
      * @throws Exception
@@ -239,8 +244,8 @@ class WebAuth extends WebAuthBase
             $urlState = substr($state, $splitPos + 1);
         }
         if (!Security::stringEquals($csrfTokenFromSession, $givenCsrfToken)) {
-            throw new WebAuthException_Csrf("Expected ".Client::q($csrfTokenFromSession).
-                                           ", got ".Client::q($givenCsrfToken).".");
+            throw new WebAuthException_Csrf("Expected ".Util::q($csrfTokenFromSession) .
+                                           ", got ".Util::q($givenCsrfToken) .".");
         }
         $this->csrfTokenStore->clear();
 

@@ -75,19 +75,28 @@ class ConfigLoadTest extends PHPUnit_Framework_TestCase
         }
     }
 
-    function testAppJsonServer() {
+    function testAppJsonServer()
+    {
         $correct = array(
             "key" => "an_app_key",
             "secret" => "an_app_secret",
             "access_type" => "AppFolder",
-            "host" => "test.droppishbox.com"
+            "auth_host" => "www.dropbox-auth.com",
+            "host_suffix" => ".droppishbox.com",
         );
 
-        file_put_contents("test.json", json_encode($correct, true));
+        $str = json_encode($correct, true);
+        self::tryAppJsonServer($str);
+        self::tryAppJsonServer("\xEF\xBB\xBF".$str);  // UTF-8 byte order mark
+    }
+
+    function tryAppJsonServer($str)
+    {
+        file_put_contents("test.json", $str);
         $appInfo = dbx\AppInfo::loadFromJsonFile("test.json");
-        $this->assertEquals($appInfo->getHost()->getContent(), "api-content-test.droppishbox.com");
-        $this->assertEquals($appInfo->getHost()->getApi(), "api-test.droppishbox.com");
-        $this->assertEquals($appInfo->getHost()->getWeb(), "meta-test.droppishbox.com");
+        $this->assertEquals($appInfo->getHost()->getContent(), "content.droppishbox.com");
+        $this->assertEquals($appInfo->getHost()->getApi(), "api.droppishbox.com");
+        $this->assertEquals($appInfo->getHost()->getWeb(), "www.dropbox-auth.com");
     }
 
     function testMissingAuthJson()
@@ -134,7 +143,8 @@ class ConfigLoadTest extends PHPUnit_Framework_TestCase
 
         $correct = array(
             "access_token" => "an_access_token",
-            "host" => "test-server.com",
+            "auth_host" => "auth.test-server.com",
+            "host_suffix" => ".test-server.com",
         );
 
         // check that we detect non-string fields

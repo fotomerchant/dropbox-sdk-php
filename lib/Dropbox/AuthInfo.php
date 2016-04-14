@@ -16,7 +16,7 @@ final class AuthInfo
      * @param string $path
      *    Path to a JSON file
      * @return array
-     *    A <code>list(string $accessToken, Host $host)</code>.
+     *    A `list(string $accessToken, Host $host)`.
      *
      * @throws AuthInfoLoadException
      */
@@ -26,8 +26,8 @@ final class AuthInfo
             throw new AuthInfoLoadException("File doesn't exist: \"$path\"");
         }
 
-        $str = file_get_contents($path);
-        $jsonArr = json_decode($str, true);
+        $str = Util::stripUtf8Bom(file_get_contents($path));
+        $jsonArr = json_decode($str, true, 10);
 
         if (is_null($jsonArr)) {
             throw new AuthInfoLoadException("JSON parse error: \"$path\"");
@@ -43,7 +43,7 @@ final class AuthInfo
      * @param array $jsonArr
      *    A parsed JSON object, typcally the result of json_decode(..., true).
      * @return array
-     *    A <code>list(string $accessToken, Host $host)</code>.
+     *    A `list(string $accessToken, Host $host)`.
      *
      * @throws AuthInfoLoadException
      */
@@ -63,21 +63,11 @@ final class AuthInfo
             throw new AuthInfoLoadException("Expecting field \"access_token\" to be a string");
         }
 
-        // Check for the optional 'host' field
-        if (!array_key_exists('host', $jsonArr)) {
-            $host = null;
+        try {
+            $host = Host::loadFromJson($jsonArr);
         }
-        else {
-            $baseHost = $jsonArr["host"];
-            if (!is_string($baseHost)) {
-                throw new AuthInfoLoadException("Optional field \"host\" must be a string");
-            }
-
-            $api = "api-$baseHost";
-            $content = "api-content-$baseHost";
-            $web = "meta-$baseHost";
-
-            $host = new Host($api, $content, $web);
+        catch (HostLoadException $ex) {
+            throw new AuthInfoLoadException($ex->getMessage());
         }
 
         return array($accessToken, $host);

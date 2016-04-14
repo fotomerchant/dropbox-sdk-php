@@ -2,9 +2,9 @@
 namespace Dropbox;
 
 /**
- * Thrown by the `AppInfo::loadXXX` methods if something goes wrong.
+ * Thrown by the `Host::loadFromJson` method if something goes wrong.
  */
-final class AppInfoLoadException extends \Exception
+final class HostLoadException extends \Exception
 {
     /**
      * @param string $message
